@@ -1,0 +1,11 @@
+{
+	"author": "alexandregv",
+	"version": "1.0.0",
+	"server_scripts": [
+		"server/whitelist.lua"
+	],
+	"client_scripts": [
+	],
+	"files": [
+	]
+}
