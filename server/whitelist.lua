@@ -86,12 +86,23 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 		end
 -- remove
 	elseif subcmd == "remove" or subcmd == "-" then
+		if #{...} > 0 then
+			arg = arg.." "..table.concat({...}, " ")
+		end
+
+		if arg == nil then
+			AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist remove <name|steamid>")
+			return
+		end
+
 		local target = GetPlayerByName(arg)
 		if target == nil then
-			AddPlayerChat(player, "Unknow player "..arg)
+			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
-				table.remove(whitelist, v)
-				AddPlayerChat(player, GetPlayerName(v).." has been removed from the whitelist.")
+				local steamid = GetPlayerSteamId(target)
+				whitelist[steamid] = nil
+				AddPlayerChat(player, "[whitelist] "..steamid.." ("..GetPlayerName(target)..") has been removed from the whitelist")
+				saveWhitelist()
 		end
 -- check
 	elseif subcmd == "check" then
