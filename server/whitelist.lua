@@ -46,22 +46,22 @@ function GetPlayerFromPartialName(name)
 	end
 end
 
+function GetPlayerFromSteamId(steamid)
+	for _, player in ipairs(GetAllPlayers()) do
+		if GetPlayerSteamId(player) == tonumber(steamid) then
+			return player
+		end
+	end
+	return nil
+end
+
 AddCommand("whitelist", function(player, subcmd, arg, ...)
 -- list
 	if subcmd == nil or subcmd == "list" then
 		AddPlayerChat(player, "[whitelist] ".."Whitelist:")
 		for k, _ in pairs(whitelist) do
-			local connected = false
-			for _, vv in pairs(GetAllPlayers()) do
-					if GetPlayerSteamId(vv) == k then
-						AddPlayerChat(player, "[whitelist] ".." - "..k.." ("..GetPlayerName(vv)..")")
-						connected = true
-						break
-					end
-			end
-			if connected == false then
-				AddPlayerChat(player, "[whitelist] ".." - "..v)
-			end
+			local p = GetPlayerFromSteamId(k)
+			AddPlayerChat(player, "[whitelist] ".." - "..k..(p and ' ('..GetPlayerName(p)..')' or ''))
 		end
 		AddPlayerChat(player, "[whitelist] ".."--------------------")
 -- reload
@@ -78,7 +78,14 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 			return
 		end
 
-		local target = GetPlayerFromPartialName(arg)
+		local target = nil
+		if arg:match("^%d+$") ~= nil then
+			AddPlayerChat(player, "ID "..arg)
+			target = GetPlayerFromSteamId(arg)
+		else
+			target = GetPlayerFromPartialName(arg)
+		end
+
 		if target == nil then
 			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
@@ -98,7 +105,14 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 			return
 		end
 
-		local target = GetPlayerFromPartialName(arg)
+		local target = nil
+		if arg:match("^%d+$") ~= nil then
+			AddPlayerChat(player, "ID "..arg)
+			target = GetPlayerFromSteamId(arg)
+		else
+			target = GetPlayerFromPartialName(arg)
+		end
+
 		if target == nil then
 			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
@@ -118,11 +132,17 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 			return
 		end
 
-		local target = GetPlayerByName(arg)
+		local target = nil
+		if arg:match("^%d+$") ~= nil then
+			AddPlayerChat(player, "ID "..arg)
+			target = GetPlayerFromSteamId(arg)
+		else
+			target = GetPlayerFromPartialName(arg)
+		end
 		if target == nil then
 			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
-				AddPlayerChat(player, "[whitelist] "..steamid.." ("..GetPlayerName(target)..") is "..(whitelist[GetPlayerSteamId(target)] == 1 and '' or 'NOT ').."whitelisted")
+				AddPlayerChat(player, "[whitelist] "..GetPlayerSteamId(target).." ("..GetPlayerName(target)..") is "..(whitelist[GetPlayerSteamId(target)] == 1 and '' or 'NOT ').."whitelisted")
 		end
 	end
 end )
