@@ -1,15 +1,23 @@
 local whitelistIsEnabled = true
 local whitelist = {}
 
+function getWhitelistLength()
+	local length = 0
+	for _, __ in pairs(whitelist) do
+		length = length + 1
+	end
+	return length
+end
+
 function loadWhitelist(player)
 	whitelist = {}
 	for line in io.lines("packages/"..GetPackageName().."/whitelist.txt") do
-		table.insert(whitelist, tonumber(line))
+		whitelist[tonumber(line)] = 1
 	end
 	if player == nil then
-		print("[whitelist] ".."Whitelist loaded ("..(#whitelist).." entries)")
+		print("[whitelist] ".."Whitelist loaded ("..(getWhitelistLength()).." entries)")
 	else
-		AddPlayerChat(player, "Whitelist loaded ("..(#whitelist).." entries)")
+		AddPlayerChat(player, "Whitelist loaded ("..(getWhitelistLength()).." entries)")
 	end
 end
 
@@ -23,7 +31,7 @@ function saveWhitelist()
 		file:write(k, "\n")
 	end
 	file:close()
-	print("[whitelist] ".."Whitelist saved! ("..(#whitelist).." entries)")
+	print("[whitelist] ".."Whitelist saved! ("..(getWhitelistLength()).." entries)")
 end
 
 function GetPlayerByName(name)
@@ -39,11 +47,11 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 -- list
 	if subcmd == nil or subcmd == "list" then
 		AddPlayerChat(player, "[whitelist] ".."Whitelist:")
-		for _, v in pairs(whitelist) do
+		for k, _ in pairs(whitelist) do
 			local connected = false
 			for _, vv in pairs(GetAllPlayers()) do
-					if GetPlayerSteamId(vv) == v then
-						AddPlayerChat(player, "[whitelist] ".." - "..v.." ("..GetPlayerName(vv)..")")
+					if GetPlayerSteamId(vv) == k then
+						AddPlayerChat(player, "[whitelist] ".." - "..k.." ("..GetPlayerName(vv)..")")
 						connected = true
 						break
 					end
@@ -72,7 +80,7 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
 				local steamid = GetPlayerSteamId(target)
-				table.insert(whitelist, steamid)
+				whitelist[steamid] = 1
 				AddPlayerChat(player, "[whitelist] "..steamid.." ("..GetPlayerName(target)..") has been added to the whitelist")
 				saveWhitelist()
 		end
@@ -105,8 +113,8 @@ end )
 AddEvent("OnPlayerSteamAuth", function(player)
 	local steamid = GetPlayerSteamId(player)
 	if whitelistIsEnabled == true then
-		for _, v in pairs(whitelist) do
-			if v == steamid then
+		for k, v in pairs(whitelist) do
+			if k == steamid then
 				return
 			end
 		end
