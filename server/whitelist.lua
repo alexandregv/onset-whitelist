@@ -61,6 +61,38 @@ end
 
 -- subcommands
 
+local helps_sorted = {
+	[1]  = "help",
+	[2]  = "list",
+	[3]  = "add",
+	[4]  = "remove",
+	[5]  = "check",
+	[6]  = "reload",
+}
+
+local helps = {
+	["help"] = "/whitelist help [cmd] | Print help about commands",
+	["list"] = "/whitelist list | List all whitelisted IDs (players)",
+	["add"] = "/whitelist add <name|steamid> | Add a player to the whitelist",
+	["remove"] = "/whitelist remove <name|steamid> | Remove a player from the whitelist",
+	["check"] = "/whitelist check <name|steamid> | Check if a player is in the whitelist",
+	["reload"] = "/whitelist restart | Reload the whitelist if you manually changed whitelist.txt",
+}
+
+local function help(player, cmd)
+	local help = helps[cmd]
+	if cmd == nil then
+		for _, v in ipairs(helps_sorted) do
+			AddPlayerChat(player, "[whitelist] "..helps[v])
+		end
+	elseif help then
+		AddPlayerChat(player, "[whitelist] "..help)
+	else
+		AddPlayerChat(player, "[whitelist] "..helps["help"])
+	end
+end
+
+
 function list(player, arg)
 	AddPlayerChat(player, "[whitelist] ".."Whitelist:")
 	for k, _ in pairs(whitelist) do
@@ -80,7 +112,7 @@ function add(player, arg, ...)
 	end
 
 	if arg == nil then
-		AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist add <name|steamid>")
+		AddPlayerChat(player, "[whitelist] "..helps["add"])
 		return
 	end
 
@@ -108,7 +140,7 @@ function remove(player, arg, ...)
 	end
 
 	if arg == nil then
-		AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist remove <name|steamid>")
+		AddPlayerChat(player, "[whitelist] "..helps["remove"])
 		return
 	end
 
@@ -136,7 +168,7 @@ function check(player, arg, ...)
 	end
 
 	if arg == nil then
-		AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist check <name|steamid>")
+		AddPlayerChat(player, "[whitelist] "..helps["check"])
 		return
 	end
 
