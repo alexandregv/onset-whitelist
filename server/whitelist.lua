@@ -1,11 +1,16 @@
-local whitelistIsEnabled = false
+local whitelistIsEnabled = true
 local whitelist = {}
 
-function loadWhitelist()
+function loadWhitelist(player)
+	whitelist = {}
 	for line in io.lines("packages/"..GetPackageName().."/whitelist.txt") do
 		table.insert(whitelist, tonumber(line))
 	end
-	print("Whitelist loaded! ("..(#whitelist).." entries)")
+	if player == nil then
+		print("Whitelist loaded! ("..(#whitelist).." entries)")
+	else
+		AddPlayerChat(player, "Whitelist loaded! ("..(#whitelist).." entries)")
+	end
 end
 
 function saveWhitelist()
@@ -34,22 +39,32 @@ end
 AddCommand("whitelist", function(player, subcmd, arg)
 -- list
 	if subcmd == nil or subcmd == "list" then
-		AddPlayerChat("Whitelist:")
+		AddPlayerChat(player, "Whitelist:")
 		for _, v in pairs(whitelist) do
-			AddPlayerChat(" - "..GetPlayerName(v)) -- TODO: Handle false with disconnected players
+			local connected = false
+			for _, vv in pairs(GetAllPlayers()) do
+					if GetPlayerSteamId(vv) == v then
+						AddPlayerChat(player, " - "..v.." ("..GetPlayerName(vv)..")") -- TODO: Handle false with disconnected players
+						connected = true
+						break
+					end
+			end
+			if connected == false then
+				AddPlayerChat(player, " - "..v) -- TODO: Handle false with disconnected players
+			end
 		end
 		AddPlayerChat("--------------------")
 -- reload
 	elseif subcmd == "reload" then
-		loadWhitelist()
+		loadWhitelist(player)
 -- add
 	elseif subcmd == "add" or subcmd == "+" then
 		local target = GetPlayerByName(arg)
 		if target == nil then
 			AddPlayerChat(player, "Unknow player "..arg)
 		else
-				table.insert(whitelist, v)
-				AddPlayerChat(player, GetPlayerName(v).." has been added to the whitelist.")
+				table.insert(whitelist, arg)
+				AddPlayerChat(player, GetPlayerName(arg).." has been added to the whitelist.")
 		end
 -- remove
 	elseif subcmd == "remove" or subcmd == "-" then
@@ -78,16 +93,19 @@ AddCommand("whitelist", function(player, subcmd, arg)
 end )
 
 AddEvent("OnPlayerSteamAuth", function(player)
-	if whithelistIsEnabled then
-		local steamid = GetPlayerSteamId(player)
-		for k, v in pairs(whitelist) do
+	local steamid = GetPlayerSteamId(player)
+	print("auth: "..steamid)
+
+	if whitelistIsEnabled == true then
+		for _, v in pairs(whitelist) do
 			if v == steamid then
-				KickPlayer(player, "You are not whitelisted on this server!")
+				print("whitelisted: "..v)
 				break
 			end
 		end
+		print("kick")
+		KickPlayer(player, "You are not whitelisted on this server!")
 	end
 end )
 
-AddEvent("OnPackageStart", saveWhitelist)
 AddEvent("OnPackageStart", loadWhitelist)
