@@ -35,7 +35,7 @@ function GetPlayerByName(name)
 		return nil
 end
 
-AddCommand("whitelist", function(player, subcmd, arg)
+AddCommand("whitelist", function(player, subcmd, arg, ...)
 -- list
 	if subcmd == nil or subcmd == "list" then
 		AddPlayerChat(player, "[whitelist] ".."Whitelist:")
@@ -58,8 +58,12 @@ AddCommand("whitelist", function(player, subcmd, arg)
 		loadWhitelist(player)
 -- add
 	elseif subcmd == "add" or subcmd == "+" then
+		if #{...} > 0 then
+			arg = arg.." "..table.concat({...}, " ")
+		end
+
 		if arg == nil then
-			AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist add <name>")
+			AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist add <name|steamid>")
 			return
 		end
 
