@@ -7,9 +7,9 @@ function loadWhitelist(player)
 		table.insert(whitelist, tonumber(line))
 	end
 	if player == nil then
-		print("Whitelist loaded! ("..(#whitelist).." entries)")
+		print("[whitelist] ".."Whitelist loaded ("..(#whitelist).." entries)")
 	else
-		AddPlayerChat(player, "Whitelist loaded! ("..(#whitelist).." entries)")
+		AddPlayerChat(player, "Whitelist loaded ("..(#whitelist).." entries)")
 	end
 end
 
@@ -24,7 +24,7 @@ function saveWhitelist()
 		file:write(v, "\n")
 	end
 	file:close()
-	print("Whitelist saved! ("..(#whitelist).." entries)")
+	print("[whitelist] ".."Whitelist saved! ("..(#whitelist).." entries)")
 end
 
 function GetPlayerByName(name)
@@ -94,16 +94,13 @@ end )
 
 AddEvent("OnPlayerSteamAuth", function(player)
 	local steamid = GetPlayerSteamId(player)
-	print("auth: "..steamid)
-
 	if whitelistIsEnabled == true then
 		for _, v in pairs(whitelist) do
 			if v == steamid then
-				print("whitelisted: "..v)
-				break
+				return
 			end
 		end
-		print("kick")
+		print("[whitelist] "..GetPlayerName(player).." (SteamID "..steamid..") tried to connect but is not whitelisted, kicking ("..GetPlayerIP(player)..")")
 		KickPlayer(player, "You are not whitelisted on this server!")
 	end
 end )
