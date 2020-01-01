@@ -55,7 +55,7 @@ function GetPlayerFromSteamId(steamid)
 	return nil
 end
 
-AddCommand("whitelist", function(player, subcmd, arg, ...)
+function main_command(player, subcmd, arg, ...)
 -- list
 	if subcmd == nil or subcmd == "list" then
 		AddPlayerChat(player, "[whitelist] ".."Whitelist:")
@@ -145,7 +145,10 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 				AddPlayerChat(player, "[whitelist] "..GetPlayerSteamId(target).." ("..GetPlayerName(target)..") is "..(whitelist[GetPlayerSteamId(target)] == 1 and '' or 'NOT ').."whitelisted")
 		end
 	end
-end )
+end
+
+AddCommand("whitelist", main_command)
+AddCommand("wl", main_command)
 
 AddEvent("OnPlayerSteamAuth", function(player)
 	local steamid = GetPlayerSteamId(player)
