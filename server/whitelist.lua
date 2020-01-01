@@ -34,13 +34,16 @@ function saveWhitelist()
 	print("[whitelist] ".."Whitelist saved! ("..(getWhitelistLength()).." entries)")
 end
 
-function GetPlayerByName(name)
-		for _, v in pairs(GetAllPlayers()) do
-			if string.lower(GetPlayerName(v)) == string.lower(name) then
-				return v
+function GetPlayerFromPartialName(name)
+	local name = name and name:gsub("#%x%x%x%x%x%x", ""):lower() or nil
+	if name then
+		for _, player in ipairs(GetAllPlayers()) do
+			local playerName = GetPlayerName(player):gsub("#%x%x%x%x%x%x", ""):lower()
+			if playerName:find(name, 1, true) then
+				return player
 			end
 		end
-		return nil
+	end
 end
 
 AddCommand("whitelist", function(player, subcmd, arg, ...)
@@ -75,7 +78,7 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 			return
 		end
 
-		local target = GetPlayerByName(arg)
+		local target = GetPlayerFromPartialName(arg)
 		if target == nil then
 			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
@@ -95,7 +98,7 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 			return
 		end
 
-		local target = GetPlayerByName(arg)
+		local target = GetPlayerFromPartialName(arg)
 		if target == nil then
 			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
@@ -106,17 +109,20 @@ AddCommand("whitelist", function(player, subcmd, arg, ...)
 		end
 -- check
 	elseif subcmd == "check" then
+		if #{...} > 0 then
+			arg = arg.." "..table.concat({...}, " ")
+		end
+
+		if arg == nil then
+			AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist check <name|steamid>")
+			return
+		end
+
 		local target = GetPlayerByName(arg)
 		if target == nil then
-			AddPlayerChat(player, "Unknow player "..arg)
+			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
-				for _, v in pairs(whitelist) do
-					if v == target then
-						AddPlayerChat(player, GetPlayerName(v).." has been added to the whitelist.")
-						return
-					end
-				end
-				AddPlayerChat(player, GetPlayerName(v).." is not whitelisted.")
+				AddPlayerChat(player, "[whitelist] "..steamid.." ("..GetPlayerName(target)..") is "..(whitelist[GetPlayerSteamId(target)] == 1 and '' or 'NOT ').."whitelisted")
 		end
 	end
 end )
