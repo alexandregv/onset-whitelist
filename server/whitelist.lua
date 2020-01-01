@@ -19,9 +19,8 @@ function saveWhitelist()
 	file:close()
 
 	file = io.open("packages/"..GetPackageName().."/whitelist.txt", "a+")
-	for _, v in pairs({1,2,3,4}) do
-	--for _, v in pairs(whitelist) do
-		file:write(v, "\n")
+	for k, _ in pairs(whitelist) do
+		file:write(k, "\n")
 	end
 	file:close()
 	print("[whitelist] ".."Whitelist saved! ("..(#whitelist).." entries)")
@@ -30,7 +29,7 @@ end
 function GetPlayerByName(name)
 		for _, v in pairs(GetAllPlayers()) do
 			if string.lower(GetPlayerName(v)) == string.lower(name) then
-				return GetPlayerName(v)
+				return v
 			end
 		end
 		return nil
@@ -39,32 +38,39 @@ end
 AddCommand("whitelist", function(player, subcmd, arg)
 -- list
 	if subcmd == nil or subcmd == "list" then
-		AddPlayerChat(player, "Whitelist:")
+		AddPlayerChat(player, "[whitelist] ".."Whitelist:")
 		for _, v in pairs(whitelist) do
 			local connected = false
 			for _, vv in pairs(GetAllPlayers()) do
 					if GetPlayerSteamId(vv) == v then
-						AddPlayerChat(player, " - "..v.." ("..GetPlayerName(vv)..")") -- TODO: Handle false with disconnected players
+						AddPlayerChat(player, "[whitelist] ".." - "..v.." ("..GetPlayerName(vv)..")")
 						connected = true
 						break
 					end
 			end
 			if connected == false then
-				AddPlayerChat(player, " - "..v) -- TODO: Handle false with disconnected players
+				AddPlayerChat(player, "[whitelist] ".." - "..v)
 			end
 		end
-		AddPlayerChat("--------------------")
+		AddPlayerChat(player, "[whitelist] ".."--------------------")
 -- reload
 	elseif subcmd == "reload" then
 		loadWhitelist(player)
 -- add
 	elseif subcmd == "add" or subcmd == "+" then
+		if arg == nil then
+			AddPlayerChat(player, "[whitelist] ".."Usage: /whitelist add <name>")
+			return
+		end
+
 		local target = GetPlayerByName(arg)
 		if target == nil then
-			AddPlayerChat(player, "Unknow player "..arg)
+			AddPlayerChat(player, "[whitelist] ".."Can't find player: "..arg)
 		else
-				table.insert(whitelist, arg)
-				AddPlayerChat(player, GetPlayerName(arg).." has been added to the whitelist.")
+				local steamid = GetPlayerSteamId(target)
+				table.insert(whitelist, steamid)
+				AddPlayerChat(player, "[whitelist] "..steamid.." ("..GetPlayerName(target)..") has been added to the whitelist")
+				saveWhitelist()
 		end
 -- remove
 	elseif subcmd == "remove" or subcmd == "-" then
